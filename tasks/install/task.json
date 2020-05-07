@@ -1,5 +1,5 @@
 {
-    "id": "fca8d27d-85f4-4d5d-a519-8d7a7edf15d7",
+    "id": "59d7ff22-5ef7-48c2-9411-b6f6be7e7e99",
     "name": "FlutterInstall",
     "friendlyName": "Flutter Install",
     "description": "Install the Flutter environment.",
@@ -7,9 +7,9 @@
     "category": "Tool",
     "author": "Aloïs Deniel",
     "version": {
-        "Major": 0,
-        "Minor": 2,
-        "Patch": 15
+        "Major": 1,
+        "Minor": 0,
+        "Patch": 0
     },
     "instanceNameFormat": "Flutter Install",
     "inputs": [

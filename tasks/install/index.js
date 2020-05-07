@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -53,8 +54,18 @@ function findArchitecture() {
 }
 function downloadAndCacheSdk(versionSpec, channel, arch) {
     return __awaiter(this, void 0, void 0, function* () {
+        // Flutter had a 'v' prefix before the version number in the URL up until Flutter 1.17.
+        // From 1.17 and forward the v was dropped from the URL. This if-case adds backwards compatibility
+        //  with all Flutter versions from 2019 up until 1.17.
+        let versionPrefix = '';
+        for (let minor = 0; minor < 17; minor++) {
+            if (versionSpec.startsWith(`1.${minor}.`)) {
+                versionPrefix = 'v';
+                break;
+            }
+        }
         // 1. Download SDK archive
-        let downloadUrl = `https://storage.googleapis.com/flutter_infra/releases/${channel}/${arch}/flutter_${arch}_v${versionSpec}.zip`;
+        let downloadUrl = `https://storage.googleapis.com/flutter_infra/releases/${channel}/${arch}/flutter_${arch}__${versionPrefix}${versionSpec}.zip`;
         task.debug(`Starting download archive from '${downloadUrl}'`);
         var bundleZip = yield tool.downloadTool(downloadUrl);
         task.debug(`Succeeded to download '${bundleZip}' archive from '${downloadUrl}'`);
@@ -76,7 +87,11 @@ function findLatestSdkVersion(channel, arch) {
         var currentHash = json.current_release[channel];
         task.debug(`Last version hash '${currentHash}'`);
         var current = json.releases.find((item) => item.hash === currentHash);
-        return current.version.substring(1); // removing leading 'v'
+        var version = current.version;
+        // Old versions started with a v prefix, remove it if present
+        if (version.startsWith('v'))
+            version = version.substring(1);
+        return version;
     });
 }
 main().catch(error => {
